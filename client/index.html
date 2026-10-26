@@ -7,6 +7,8 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div id="particles" aria-hidden="true"></div>
+<div id="spotlight" aria-hidden="true"></div>
 <header class="game-header">
   <!-- 2D boss logo: black silhouette boss, auction hammer behind the words -->
   <div class="logo-scene" aria-label="Silent Bid logo">
@@ -124,13 +126,16 @@
   <!-- DRAFT BOARD -->
   <section id="panel-draft" class="panel" hidden>
     <h2>Phase 1: The Draft Board — <span id="draftCount">0/10 selected</span> · <span id="draftTimer"></span></h2>
-    <p class="hint">Pick 10 items you want. No one else can see your picks.</p>
+    <p class="hint">Pick 10 items you want. No one else can see your picks. Picked items fly into your wanted tray below.</p>
     <div id="draftGrid" class="draft-grid"></div>
+    <div id="wantedTray" class="wanted-tray" aria-label="Your wanted items"></div>
   </section>
 
   <!-- AUCTION FLOOR -->
   <section id="panel-game" class="panel" hidden>
     <div id="gameHeader"><h2 id="roundTitle"></h2><span id="gameTimer"></span></div>
+    <div class="progress-wrap"><div class="progress-bar"><div id="progressFill"></div></div><span id="progressText" class="hint"></span></div>
+    <div id="confetti" aria-hidden="true"></div>
     <p id="maskStateLine" class="hint"></p>
     <div id="playerRow" class="avatar-grid"></div>
     <div class="card" id="hintCard"><p id="hintText"></p></div>

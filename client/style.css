@@ -94,4 +94,37 @@ label{display:block;margin:8px 0}.hint{color:var(--muted)}.error{color:var(--red
 .diary-page.flip-down{transform:translateY(14px) rotateX(-18deg);opacity:0}
 .diary-controls{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:16px}
 .diary-controls button{background:#5b1f1f;color:#fff;border-color:#3a1212}
+/* Gamified layer: floating dust, mouse spotlight, bobbing avatars, screen shake, progress, tray, confetti. */
+#particles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.particle{position:absolute;bottom:-10px;width:5px;height:5px;border-radius:50%;background:var(--gold);opacity:.45;animation:floatUp linear infinite}
+@keyframes floatUp{from{transform:translateY(0) translateX(0);opacity:0}15%{opacity:.6}to{transform:translateY(-105vh) translateX(30px);opacity:0}}
+#spotlight{position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(240px 240px at var(--mx,50%) var(--my,20%), rgba(245,197,24,.10), transparent 70%)}
+.avatar svg,.avatar-frame svg{animation:bob 3.2s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-.5deg)}50%{transform:translateY(-4px) rotate(.5deg)}}
+body.shake{animation:shake .4s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+button{transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease}
+button:active{transform:scale(.96)}
+.avatar-frame:hover{transform:scale(1.02) rotate(-.5deg)}
+.avatar{transition:transform .18s ease, outline-color .18s ease}
+.avatar:hover{transform:translateY(-4px) scale(1.03)}
+.avatar.winner{outline:3px solid var(--gold);animation:winnerBounce .8s ease infinite}
+@keyframes winnerBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.avatar.dim{opacity:.45}
+.progress-wrap{margin:10px 0}
+.progress-bar{height:14px;background:#111827;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+#progressFill{height:100%;width:0%;background:linear-gradient(90deg,#b8860b,var(--gold));transition:width .5s ease}
+.wanted-tray{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;min-height:36px}
+.wanted-tray .chip{background:#3a3410;border:1px solid var(--gold);color:#ffe58a;border-radius:999px;padding:4px 10px;font-size:13px;font-weight:700;animation:popIn .3s ease}
+@keyframes popIn{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+.draft-grid button{transition:transform .15s ease, background .15s ease, border-color .15s ease}
+.draft-grid button.selected{transform:scale(1.04)}
+#gameTimer.urgent{color:var(--red-bright);font-weight:900;animation:urgentPulse .8s ease-in-out infinite}
+@keyframes urgentPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+#revealCard{animation:revealIn .5s ease}
+@keyframes revealIn{from{transform:rotateY(60deg) scale(.9);opacity:0}to{transform:rotateY(0) scale(1);opacity:1}}
+#confetti{position:relative;height:0}
+.coin-burst{position:absolute;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 35% 35%, #ffe58a, #b8860b);border:1px solid #7a5a00;animation:burst 1.6s ease-out forwards;pointer-events:none}
+@keyframes burst{from{transform:translate(0,0) scale(1);opacity:1}to{transform:translate(var(--dx,40px),120px) scale(.6);opacity:0}}
+#chatFeed div{animation:popIn .25s ease}
 @media(max-width:700px){.logo{font-size:36px}.poster{display:none}.draft-grid{grid-template-columns:repeat(3,1fr)}.avatar-frame{width:150px;height:150px}.corner{bottom:8px}.book-cover{width:58px;height:78px;font-size:12px}}

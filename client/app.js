@@ -1,4 +1,4 @@
-import { ITEMS, AVATAR_COLORS, COLOR_HEX, EYE_STYLES, MASK_TYPES } from "../game-logic.js";
+import { ITEMS, AVATAR_COLORS, COLOR_HEX, EYE_STYLES, MASK_TYPES, scalingFor } from "../game-logic.js";
 
 const $ = (id) => document.getElementById(id);
 const wsProto = location.protocol === "https:" ? "wss" : "ws";
@@ -87,7 +87,23 @@ function avatarHTML(p, masked) {
 function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
 function send(obj) { if (ws.readyState === 1) ws.send(JSON.stringify(obj)); }
 
-// --- Sound, generated in the browser with WebAudio (no audio files, no API) ---
+// --- Gamified layer: dust particles, mouse spotlight, screen shake ---
+for (let i = 0; i < 24; i++) {
+  const p = document.createElement("span");
+  p.className = "particle";
+  p.style.left = `${Math.random() * 100}%`;
+  p.style.animationDuration = `${9 + Math.random() * 12}s`;
+  p.style.animationDelay = `${Math.random() * 12}s`;
+  $("particles").appendChild(p);
+}
+document.addEventListener("mousemove", (e) => {
+  document.body.style.setProperty("--mx", `${e.clientX}px`);
+  document.body.style.setProperty("--my", `${e.clientY}px`);
+});
+function shake() {
+  document.body.classList.add("shake");
+  setTimeout(() => document.body.classList.remove("shake"), 450);
+}
 let soundOn = localStorage.getItem("silentbid-sound") !== "off";
 let audioCtx = null;
 function tone(freq, dur, type = "sine", gain = 0.08, when = 0) {
@@ -197,7 +213,7 @@ renderDiaryPage();
 // --- Corner hammer: glows on hover (CSS), strikes on click, then plays ---
 $("hammerBtn").addEventListener("click", () => {
   const btn = $("hammerBtn");
-  playGavel();
+  playGavel(); shake();
   btn.classList.add("striking");
   setTimeout(() => {
     btn.classList.remove("striking");
@@ -251,7 +267,18 @@ function render() {
   }
   document.body.dataset.ominous = String(ominous);
   document.body.dataset.phase = state.phase;
-  if (state.phase === "reveal" && lastPhase !== "reveal") playReveal();
+  if (state.phase === "reveal" && lastPhase !== "reveal") {
+    playReveal(); shake();
+    const conf = $("confetti");
+    for (let i = 0; i < 24; i++) {
+      const c = document.createElement("span");
+      c.className = "coin-burst";
+      c.style.left = `${20 + Math.random() * 60}%`;
+      c.style.setProperty("--dx", `${(Math.random() - 0.5) * 240}px`);
+      conf.appendChild(c);
+      setTimeout(() => c.remove(), 1700);
+    }
+  }
   if (state.phase === "ended" && lastPhase !== "ended") playWin();
   lastPhase = state.phase;
   const me = state.players.find((p) => p.id === myId);
@@ -272,11 +299,19 @@ function render() {
       return `<button class="${selected ? "selected" : ""}" data-item="${escapeHtml(item.name)}">${escapeHtml(item.name)}${selected ? " ✓" : ""}</button>`;
     }).join("");
     $("draftGrid").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => send({ type: "draft_select", item: b.dataset.item })));
+    $("wantedTray").innerHTML = state.myTargets.map((t) => `<span class="chip">${escapeHtml(t)}</span>`).join("") || `<span class="hint">Your wanted tray is empty — pick 10.</span>`;
   } else if (["discussion", "bidding", "reveal"].includes(state.phase)) {
     show("panel-game");
     $("panel-game").classList.toggle("silent", state.phase === "bidding");
     $("roundTitle").textContent = `Round ${state.round}/25`;
     $("gameTimer").textContent = `${state.timeLeft}s · ${state.phase.toUpperCase()}`;
+    $("gameTimer").classList.toggle("urgent", state.timeLeft <= 10 && state.timeLeft > 0);
+    if (me) {
+      const need = scalingFor(state.players.length).itemsToWin;
+      const pct = Math.min(100, Math.round((me.won.length / need) * 100));
+      $("progressFill").style.width = `${pct}%`;
+      $("progressText").textContent = `You: ${me.won.length} / ${need} items won · Wallet ₹${me.wallet}`;
+    }
     $("maskStateLine").textContent = state.masked
       ? "MASKED — masks are on, chat is off."
       : "UNMASKED — masks are off, you can talk.";
@@ -293,6 +328,12 @@ function render() {
       $("revealItem").textContent = `Revealed item: ${state.reveal.item}`;
       $("revealReason").textContent = state.reveal.reason;
       $("revealBids").innerHTML = state.reveal.bids.map((b) => `<li>${escapeHtml(b.name)}: ${b.amount == null ? "no bid" : "₹" + b.amount}${b.name === state.reveal.winnerName ? " — WINNER!" : ""}</li>`).join("");
+      // Winner spotlight; everyone else dims for the moment.
+      $("playerRow").querySelectorAll(".avatar").forEach((el) => {
+        const isWinner = state.reveal.winnerName && el.textContent.includes(state.reveal.winnerName);
+        el.classList.toggle("winner", !!isWinner);
+        el.classList.toggle("dim", !!state.reveal.winnerName && !isWinner);
+      });
     } else $("revealCard").hidden = true;
     $("chatFeed").innerHTML = state.chat.map((c) => `<div><b>${escapeHtml(c.from)}:</b> ${escapeHtml(c.text)}</div>`).join("");
   } else if (state.phase === "ended") {
