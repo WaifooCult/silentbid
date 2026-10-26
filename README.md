@@ -37,10 +37,24 @@ point it at a Render server with `?ws=wss://<render-host>` to play.
 ## The game loop
 
 ### Start page & lobby
-- **Avatar setup first:** display name (sanitized), base color (8 muted
+- **Start page (skribbl-style, Silent Bid theme):** centred logo, name
+  input, a large avatar in the middle with `<` / `>` arrows to cycle eyes,
+  mask and colour, a Random button, and big **Play!** (green) and
+  **Create Private Room** (blue) buttons, plus join-with-code. The dark
+  charcoal + crimson/cyan/gold theme from the original design is kept.
+- **Avatar setup:** display name (sanitized), base color (8 muted
   colors), eyes/expression (6: Tired, Calculating, Suspicious, Deadpan,
   Intense, Angry), and mask type (5 lower-face masks: Bandana, Gas Mask
-  Lower, Black Cloth, Armored Plate, Balaclava Lower).
+  Lower, Black Cloth, Armored Plate, Balaclava Lower). The preview is
+  **masked by default** — the masked version is what you see in the lobby
+  and when bidding — with a toggle to see the unmasked version.
+- **Rules Diary:** a short diary on the start page (toggleable from the
+  header) explaining the game in simple, plain terms only — goal, draft,
+  talk, silent bid, reveal, ties, money, winning — with no advanced
+  definitions.
+- **No ladder display:** avatar cards never show a wallet or a "won"
+  count. Your wallet is shown only in the bidding box, where you need it
+  to choose a bid. This is a single operation, not a climb to a new league.
 - `[CREATE PRIVATE ROOM]` generates a `CODE-XXXX` private room.
 - `[FIND RANDOM ROOM]` searches the public queue and **never creates a
   room if it is empty**.

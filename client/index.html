@@ -7,35 +7,62 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header><h1 class="logo">SILENT BID</h1><p id="status">Loading…</p></header>
+<header>
+  <h1 class="logo">SILENT BID</h1>
+  <div class="header-actions">
+    <button id="rulesToggleBtn" class="btn-small">Rules Diary</button>
+    <span id="status">Loading…</span>
+  </div>
+</header>
+
 <main>
-  <!-- START PAGE / AVATAR & LOBBY SETUP -->
-  <section id="panel-setup" class="panel">
-    <h2>Avatar &amp; Lobby Setup</h2>
-    <div class="setup-grid">
-      <div class="card">
+  <!-- START PAGE — skribbl-style centred setup -->
+  <section id="panel-setup" class="panel start-panel">
+    <div class="start-card">
+      <label class="name-label">Enter your name
+        <input id="nameInput" placeholder="Enter your name" maxlength="20">
+      </label>
+
+      <!-- Avatar selector: arrows cycle each part, like skribbl.io -->
+      <div class="avatar-selector">
         <div id="avatarPreview" class="avatar-preview"></div>
-        <label>Display name <input id="nameInput" placeholder="Operative name" maxlength="20"></label>
-        <label>Base color <select id="colorInput"></select></label>
-        <label>Eyes / expression <select id="eyesInput"></select></label>
-        <label>Mask type <select id="maskInput"></select></label>
-      </div>
-      <div class="card">
-        <button id="playBtn" class="btn-cyan">[PLAY]</button>
-        <div id="roomActions" hidden>
-          <button id="createBtn" class="btn-red">[CREATE PRIVATE ROOM]</button>
-          <button id="randomBtn" class="btn-cyan">[FIND RANDOM ROOM]</button>
-          <label>Join with code <input id="codeInput" placeholder="CODE, e.g. K9X2" maxlength="4"></label>
-          <button id="joinBtn">[JOIN WITH CODE]</button>
+        <button id="randomAvatarBtn" class="dice-btn" title="Random avatar">Random</button>
+        <div class="selector-rows">
+          <div class="selector-row">
+            <button class="arrow-btn" data-cycle="eyes" data-dir="-1">&lt;</button>
+            <span class="selector-label">Eyes: <b id="eyesValue"></b></span>
+            <button class="arrow-btn" data-cycle="eyes" data-dir="1">&gt;</button>
+          </div>
+          <div class="selector-row">
+            <button class="arrow-btn" data-cycle="mask" data-dir="-1">&lt;</button>
+            <span class="selector-label">Mask: <b id="maskValue"></b></span>
+            <button class="arrow-btn" data-cycle="mask" data-dir="1">&gt;</button>
+          </div>
+          <div class="selector-row">
+            <button class="arrow-btn" data-cycle="color" data-dir="-1">&lt;</button>
+            <span class="selector-label">Colour: <b id="colorValue"></b></span>
+            <button class="arrow-btn" data-cycle="color" data-dir="1">&gt;</button>
+          </div>
+          <button id="maskToggleBtn" class="btn-small">Show unmasked version</button>
+          <p class="hint" id="maskNote">Preview is masked — this is how you look when bidding.</p>
         </div>
-        <p class="hint">Create generates a CODE-XXXX private room. Find Random searches the public queue and never creates a room if it is empty.</p>
       </div>
+
+      <button id="playBtn" class="btn-big btn-green">Play!</button>
+      <button id="createBtn" class="btn-big btn-blue">Create Private Room</button>
+      <div class="join-row">
+        <input id="codeInput" placeholder="Room code, e.g. K9X2" maxlength="4">
+        <button id="joinBtn">Join with code</button>
+      </div>
+      <p class="hint">Play! finds a public room. Create Private Room makes a CODE-XXXX room. Find Random never creates a room if the public queue is empty — use Create Private Room instead.</p>
+      <p class="hint">Tip: open the Rules Diary above if this is your first game. It is short and plain.</p>
     </div>
   </section>
 
   <!-- LOBBY / HOST SETTINGS -->
   <section id="panel-lobby" class="panel" hidden>
     <h2>Waiting Room <span id="roomCode"></span></h2>
+    <p class="hint">Everyone here is shown <b>masked</b> — that is how operatives wait before a round.</p>
     <div id="lobbyGrid" class="avatar-grid"></div>
     <div id="hostSettings" class="card" hidden>
       <h3>Host settings</h3>
@@ -54,12 +81,14 @@
   <!-- DRAFT BOARD -->
   <section id="panel-draft" class="panel" hidden>
     <h2>Phase 1: The Draft Board — <span id="draftCount">0/10 selected</span> · <span id="draftTimer"></span></h2>
+    <p class="hint">Pick 10 items you want. No one else can see your picks.</p>
     <div id="draftGrid" class="draft-grid"></div>
   </section>
 
   <!-- AUCTION FLOOR -->
   <section id="panel-game" class="panel" hidden>
     <div id="gameHeader"><h2 id="roundTitle"></h2><span id="gameTimer"></span></div>
+    <p id="maskStateLine" class="hint"></p>
     <div id="playerRow" class="avatar-grid"></div>
     <div class="card" id="hintCard"><p id="hintText"></p></div>
     <div id="revealCard" class="card" hidden>
@@ -74,15 +103,35 @@
       <div id="bidBox" hidden>
         <label>Your blind bid (₹) <input id="bidInput" type="number" placeholder="₹_____"></label>
         <button id="bidBtn" class="btn-cyan">[SUBMIT BLIND BID]</button>
+        <span id="walletLine" class="hint"></span>
       </div>
     </div>
-    <p id="walletLine" class="hint"></p>
   </section>
 
   <section id="panel-ended" class="panel" hidden>
     <h2>Operation complete</h2><p id="endedText"></p>
   </section>
   <p id="error" class="error"></p>
+
+  <!-- RULES DIARY — simple terms only -->
+  <section id="rulesDiary" class="panel diary">
+    <div class="diary-head">
+      <h2>Rules Diary</h2>
+      <button id="rulesCloseBtn" class="btn-small">Close</button>
+    </div>
+    <p class="hint">Short and simple. Read this once and you can play.</p>
+    <ol class="diary-list">
+      <li><b>Goal.</b> Get the items you need before anyone else does.</li>
+      <li><b>Draft.</b> First, pick 10 items you want. No one sees your picks.</li>
+      <li><b>Talk.</b> Each round, you get a vague hint. Talk for up to 3 minutes. Masks are off here, so you can see faces.</li>
+      <li><b>Bid in silence.</b> Then masks go back on, chat stops, and everyone writes one secret bid in 60 seconds.</li>
+      <li><b>Reveal.</b> The real item is shown, and all bids are shown too.</li>
+      <li><b>Who wins an item?</b> The highest bid wins — unless two people tie for highest. Then the lowest bidder wins. If the lowest is also tied, the second-highest bidder wins. If that is tied too, the item is lost and no one pays.</li>
+      <li><b>Money.</b> You start with game money. When you win an item, you pay what you bid. You cannot bid more than you have.</li>
+      <li><b>Winning the game.</b> First player to get enough items wins. How many you need depends on how many players are playing.</li>
+    </ol>
+    <p class="hint">That is all. No leagues, no levels, no ladder — just one operation at a time.</p>
+  </section>
 </main>
 <script type="module" src="app.js"></script>
 </body>
