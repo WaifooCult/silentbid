@@ -3,6 +3,38 @@
 Short answer: **Vercel alone is not the right host for the full multiplayer
 game, and Render is.** This is a server limitation, not a code bug.
 
+## Vercel 404: "page doesn't exist" — cause and fix
+
+**Cause:** the game page lives at `client/index.html` in the repo, and the
+repo root had no `index.html` and no `vercel.json`. Vercel serving the repo
+root therefore had nothing to show at `/`, so it returned 404. This is not
+a broken game — it is a missing entry point at the root.
+
+**Fix (now in the repo):**
+- `index.html` at the repo root redirects to `client/` — this fixes the
+  root URL on any static host.
+- `vercel.json` at the repo root rewrites `/` and `/index.html` to
+  `/client/index.html`, and `/style.css` / `/app.js` to their `client/`
+  files. The rewrites matter: the client imports `../game-logic.js`, which
+  must stay at the repo root (`/game-logic.js`), so simply setting Vercel's
+  Root Directory to `client/` would **not** work — it would hide
+  `game-logic.js` from the deployment and break `app.js`.
+
+**After pushing this fix, redeploy on Vercel:**
+1. If your Vercel project is connected to GitHub, pushing to `main`
+   triggers a new deployment automatically — wait for it to finish.
+2. If not, open the project in Vercel → **Deployments** → **Redeploy**
+   on the latest deployment.
+3. Hard-refresh the site (Ctrl+Shift+R / Cmd+Shift+R) and open `/`.
+   You should now see the SILENT BID start page, not a 404.
+
+**Important:** fixing the 404 only fixes the *page loading*. It does not
+make multiplayer work on Vercel alone — after the page loads, the status
+line will still say it cannot reach a game server, because Vercel does not
+run the WebSocket server. For actual play, use Render below, or open the
+Vercel page with `?ws=wss://<your-render-host>` as described in the
+split-deployment section.
+
 ## Why Vercel doesn't fit this game as-is
 
 Silent Bid is a long-lived Node + WebSocket server (`server/server.js`):
