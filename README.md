@@ -36,22 +36,34 @@ point it at a Render server with `?ws=wss://<render-host>` to play.
 
 ## The game loop
 
-### Start page & lobby
-- **Start page (skribbl-style, Silent Bid theme):** centred logo, name
-  input, a large avatar in the middle with `<` / `>` arrows to cycle eyes,
-  mask and colour, a Random button, and big **Play!** (green) and
-  **Create Private Room** (blue) buttons, plus join-with-code. The dark
-  charcoal + crimson/cyan/gold theme from the original design is kept.
-- **Avatar setup:** display name (sanitized), base color (8 muted
-  colors), eyes/expression (6: Tired, Calculating, Suspicious, Deadpan,
-  Intense, Angry), and mask type (5 lower-face masks: Bandana, Gas Mask
-  Lower, Black Cloth, Armored Plate, Balaclava Lower). The preview is
-  **masked by default** — the masked version is what you see in the lobby
-  and when bidding — with a toggle to see the unmasked version.
-- **Rules Diary:** a short diary on the start page (toggleable from the
-  header) explaining the game in simple, plain terms only — goal, draft,
-  talk, silent bid, reveal, ties, money, winning — with no advanced
-  definitions.
+### Start page & lobby — 2D auction-room theme
+- **Start page (2D game feel):** a flat 2D auction-room scene — boss
+  logo at the top (black silhouette of The Broker with his auction hammer
+  behind the crimson SILENT BID words), "TRUST / LIE / BID / SURVIVE" and
+  "AUCTION BEGINS" posters at the sides, and a wooden table strip at the
+  bottom with coins and photo cards. The dark charcoal + crimson/cyan/gold
+  theme from the original design is kept.
+- **Order on the start page:** Enter your name is ABOVE the avatar box,
+  then the avatar, then big red **PLAY!**, then a room-code input, then
+  **CREATE ROOM** and **JOIN ROOM** side by side.
+- **Avatar setup — a new style, not skribbl's:** a flat 2D operative
+  drawn as one layered SVG — angular hood, visor face with TWO eyes, jaw
+  and shoulders — not the skribbl pixel blob with one big eye. Cycle eyes
+  (6), mask (5) and colour (8) with `<` / `>` arrows flanking a red-framed
+  avatar box, plus a dice Random button and a mask toggle on the right.
+  The preview is **masked by default** — the masked version is what you
+  see in the lobby and when bidding — with a toggle to see the unmasked
+  version.
+- **Glowing corner elements:** the Rules book (bottom-left) and the
+  hammer on its POWER block (bottom-right) sit on the table strip. Both
+  have a padded hover area, so moving the cursor *around* them makes them
+  glow (gold for the book, red for the hammer) and scale up slightly.
+  Clicking the book opens the Rules Diary. Clicking the hammer strikes
+  (gavel animation) and plays — it finds a public room, like Play!.
+- **Rules Diary book:** clicking the book opens a book overlay. Pages
+  flip UP for next and DOWN for previous, with a page number. It explains
+  the game in simple, plain terms only — goal, draft, talk, silent bid,
+  reveal, ties, money, winning — with no advanced definitions.
 - **No ladder display:** avatar cards never show a wallet or a "won"
   count. Your wallet is shown only in the bidding box, where you need it
   to choose a bid. This is a single operation, not a climb to a new league.

@@ -9,22 +9,74 @@ const wsOverride = new URLSearchParams(location.search).get("ws");
 const ws = new WebSocket(wsOverride || `${wsProto}://${location.host}`);
 let myId = null, state = null;
 
-const EYE_GLYPHS = { Tired: "– –", Calculating: "◐ ◑", Suspicious: "↗ ↖", Deadpan: "• •", Intense: "◉ ◉", Angry: "> <" };
-const MOUTH = { Tired: "—", Calculating: "¬", Suspicious: "〰", Deadpan: "–", Intense: "▬", Angry: "⌒" };
+/**
+ * NEW avatar style — flat 2D operative, deliberately NOT the skribbl pixel
+ * blob (one big eye, pixel body). This one is an angular hood + visor face
+ * with TWO eyes, a jaw, and shoulders, drawn as one layered SVG so it
+ * stays sharp at any size and needs no image files.
+ */
+function eyesSVG(eyes) {
+  // Eye centres: left (52, 56), right (68, 56).
+  switch (eyes) {
+    case "Tired":
+      return `<line x1="45" y1="56" x2="59" y2="56" stroke="#fff" stroke-width="3"/><line x1="61" y1="56" x2="75" y2="56" stroke="#fff" stroke-width="3"/>`;
+    case "Calculating":
+      return `<ellipse cx="52" cy="56" rx="7" ry="4" fill="#fff" transform="rotate(-18 52 56)"/><ellipse cx="68" cy="56" rx="7" ry="4" fill="#fff" transform="rotate(-18 68 56)"/><circle cx="54" cy="56" r="2" fill="#111"/><circle cx="70" cy="56" r="2" fill="#111"/>`;
+    case "Suspicious":
+      return `<circle cx="52" cy="56" r="6" fill="#fff"/><circle cx="68" cy="56" r="6" fill="#fff"/><circle cx="55" cy="56" r="2.5" fill="#111"/><circle cx="71" cy="56" r="2.5" fill="#111"/>`;
+    case "Intense":
+      return `<rect x="44" y="53" width="16" height="4" fill="#fff"/><rect x="60" y="53" width="16" height="4" fill="#fff"/><circle cx="52" cy="55" r="1.8" fill="#ff2d2d"/><circle cx="68" cy="55" r="1.8" fill="#ff2d2d"/>`;
+    case "Angry":
+      return `<line x1="44" y1="50" x2="60" y2="54" stroke="#fff" stroke-width="3"/><line x1="76" y1="50" x2="60" y2="54" stroke="#fff" stroke-width="3"/><circle cx="52" cy="58" r="4" fill="#fff"/><circle cx="68" cy="58" r="4" fill="#fff"/><circle cx="52" cy="58" r="1.8" fill="#111"/><circle cx="68" cy="58" r="1.8" fill="#111"/>`;
+    case "Deadpan":
+    default:
+      return `<circle cx="52" cy="56" r="5" fill="#fff"/><circle cx="68" cy="56" r="5" fill="#fff"/><circle cx="52" cy="56" r="2" fill="#111"/><circle cx="68" cy="56" r="2" fill="#111"/>`;
+  }
+}
 
-// Avatar selector state — cycled with < > arrows, like skribbl.io.
-const sel = { color: 3, eyes: 3, mask: 0 }; // Charcoal, Deadpan, Bandana
-let previewMasked = true; // Masked versions are shown by default.
+function mouthSVG(eyes) {
+  switch (eyes) {
+    case "Calculating": return `<path d="M50 84 Q60 88 70 82" stroke="#e5e7eb" stroke-width="2.5" fill="none"/>`;
+    case "Suspicious": return `<path d="M50 84 Q55 81 60 84 Q65 87 70 84" stroke="#e5e7eb" stroke-width="2.5" fill="none"/>`;
+    case "Intense": return `<rect x="50" y="82" width="20" height="3" fill="#e5e7eb"/>`;
+    case "Angry": return `<path d="M50 88 Q60 80 70 88" stroke="#e5e7eb" stroke-width="2.5" fill="none"/>`;
+    case "Tired":
+    case "Deadpan":
+    default: return `<line x1="52" y1="84" x2="68" y2="84" stroke="#e5e7eb" stroke-width="2.5"/>`;
+  }
+}
+
+function maskSVG(mask, color) {
+  switch (mask) {
+    case "Gas Mask Lower":
+      return `<rect x="40" y="66" width="40" height="26" rx="8" fill="#2a2f2a" stroke="#000" stroke-width="2"/><circle cx="50" cy="80" r="6" fill="#555" stroke="#000"/><circle cx="70" cy="80" r="6" fill="#555" stroke="#000"/>`;
+    case "Black Cloth":
+      return `<rect x="40" y="66" width="40" height="26" fill="#0a0a0a" stroke="#222" stroke-width="1.5"/><line x1="42" y1="79" x2="78" y2="79" stroke="#444" stroke-width="1" stroke-dasharray="4 3"/>`;
+    case "Armored Plate":
+      return `<rect x="40" y="66" width="40" height="26" rx="4" fill="#6b7280" stroke="#111" stroke-width="2"/><circle cx="44" cy="70" r="1.8" fill="#111"/><circle cx="76" cy="70" r="1.8" fill="#111"/><circle cx="44" cy="88" r="1.8" fill="#111"/><circle cx="76" cy="88" r="1.8" fill="#111"/>`;
+    case "Balaclava Lower":
+      return `<path d="M38 60 Q60 52 82 60 L82 92 L38 92 Z" fill="${color}" stroke="#000" stroke-width="2"/><line x1="52" y1="84" x2="68" y2="84" stroke="#000" stroke-width="2"/>`;
+    case "Bandana":
+    default:
+      return `<path d="M40 68 L80 68 L78 92 L42 92 Z" fill="#111827" stroke="#000" stroke-width="2"/><circle cx="82" cy="70" r="4" fill="#111827" stroke="#000"/><line x1="44" y1="76" x2="76" y2="76" stroke="#374151" stroke-width="1.5"/>`;
+  }
+}
+
+function avatarSVG(p, masked) {
+  const color = COLOR_HEX[p.color] || "#3a3f44";
+  return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${escapeHtml(p.name)} avatar">
+    <path d="M18 120 L34 94 Q60 86 86 94 L102 120 Z" fill="${color}" stroke="#000" stroke-width="2"/>
+    <path d="M28 92 Q28 22 60 22 Q92 22 92 92 Z" fill="${color}" stroke="#000" stroke-width="2"/>
+    <path d="M28 92 Q28 22 60 22 L60 92 Z" fill="#000" opacity="0.18"/>
+    <rect x="42" y="42" width="36" height="28" rx="8" fill="#1c1c1c"/>
+    ${eyesSVG(p.eyes)}
+    ${masked ? maskSVG(p.mask, color) : mouthSVG(p.eyes)}
+  </svg>`;
+}
 
 function avatarHTML(p, masked) {
-  const color = COLOR_HEX[p.color] || "#3a3f44";
   return `<div class="avatar ${masked ? "masked" : ""}">
-    <div class="head" style="background:${color}">
-      <div class="eyes">${EYE_GLYPHS[p.eyes] || "• •"}</div>
-      ${masked
-        ? `<div class="mask">${escapeHtml(p.mask)}</div>`
-        : `<div class="mouth">${MOUTH[p.eyes] || "–"}</div>`}
-    </div>
+    ${avatarSVG(p, masked)}
     <div>${escapeHtml(p.name)}${p.isHost ? " (Host)" : ""}</div>
     ${masked
       ? `<div class="mask-tag">MASKED</div><div class="mask-name">${escapeHtml(p.mask)}</div>`
@@ -33,6 +85,11 @@ function avatarHTML(p, masked) {
 }
 function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
 function send(obj) { if (ws.readyState === 1) ws.send(JSON.stringify(obj)); }
+
+// Avatar selector state — cycled with < > arrows.
+const sel = { color: 3, eyes: 3, mask: 0 }; // Charcoal, Deadpan, Bandana
+let previewMasked = true; // Masked versions are shown by default.
+
 function profile() {
   return {
     name: $("nameInput").value.trim() || "Operative",
@@ -47,8 +104,9 @@ function renderPreview() {
   $("eyesValue").textContent = EYE_STYLES[sel.eyes];
   $("maskValue").textContent = MASK_TYPES[sel.mask];
   $("colorValue").textContent = AVATAR_COLORS[sel.color];
-  $("avatarPreview").innerHTML = avatarHTML({ ...profile(), isHost: false }, previewMasked);
-  $("maskToggleBtn").textContent = previewMasked ? "Show unmasked version" : "Show masked version";
+  // The preview frame shows ONLY the SVG avatar — no name, wallet, or count.
+  $("avatarPreview").innerHTML = avatarSVG({ ...profile(), isHost: false }, previewMasked);
+  $("maskToggleLabel").textContent = previewMasked ? "Masked" : "Unmasked";
   $("maskNote").textContent = previewMasked
     ? "Preview is masked — this is how you look when bidding."
     : "Preview is unmasked — this is how you look when talking.";
@@ -72,13 +130,59 @@ $("maskToggleBtn").addEventListener("click", () => { previewMasked = !previewMas
 $("nameInput").addEventListener("input", renderPreview);
 renderPreview();
 
-// Rules Diary toggle (visible on the start page, closable anywhere).
-$("rulesToggleBtn").addEventListener("click", () => { $("rulesDiary").hidden = !$("rulesDiary").hidden; });
-$("rulesCloseBtn").addEventListener("click", () => { $("rulesDiary").hidden = true; });
+// --- Rules Diary book: pages flip UP for next, DOWN for previous ---
+const DIARY_PAGES = [
+  { title: "Silent Bid", text: "A game of secrets and bids. Open the book, learn in a minute, then play." },
+  { title: "Goal", text: "Get the items you need before anyone else does." },
+  { title: "Draft", text: "First, pick 10 items you want. No one sees your picks." },
+  { title: "Talk", text: "Each round, you get a vague hint. Talk for up to 3 minutes. Masks are off here, so you can see faces." },
+  { title: "Bid in silence", text: "Then masks go back on, chat stops, and everyone writes one secret bid in 60 seconds." },
+  { title: "Reveal and ties", text: "The real item is shown, and all bids are shown too. Highest bid wins — unless two people tie for highest. Then the lowest bidder wins. If the lowest is also tied, the second-highest bidder wins. If that is tied too, the item is lost and no one pays. Example: Ghost Rs 1500 (Tie), Viper Rs 1500 (Tie), Shadow Rs 200 wins." },
+  { title: "Money and winning", text: "You start with game money. When you win an item, you pay what you bid. You cannot bid more than you have. First player to get enough items wins. That is all. No leagues, no levels, no ladder — just one operation at a time." },
+];
+let diaryPage = 0;
+function renderDiaryPage() {
+  const page = DIARY_PAGES[diaryPage];
+  $("diaryPageTitle").textContent = page.title;
+  $("diaryPageText").textContent = page.text;
+  $("diaryPageNum").textContent = `Page ${diaryPage + 1} / ${DIARY_PAGES.length}`;
+}
+function flipDiary(dir) {
+  const pageEl = $("diaryPage");
+  pageEl.classList.add(dir > 0 ? "flip-up" : "flip-down");
+  setTimeout(() => {
+    diaryPage = Math.min(DIARY_PAGES.length - 1, Math.max(0, diaryPage + dir));
+    renderDiaryPage();
+    pageEl.classList.remove("flip-up", "flip-down");
+  }, 260);
+}
+function openDiary() { diaryPage = 0; renderDiaryPage(); $("diaryBook").hidden = false; }
+function closeDiary() { $("diaryBook").hidden = true; }
+$("rulesToggleBtn").addEventListener("click", () => { if ($("diaryBook").hidden) openDiary(); else closeDiary(); });
+$("rulesBookBtn").addEventListener("click", openDiary);
+$("diaryCloseBtn").addEventListener("click", closeDiary);
+$("diaryNextBtn").addEventListener("click", () => { if (diaryPage < DIARY_PAGES.length - 1) flipDiary(1); });
+$("diaryPrevBtn").addEventListener("click", () => { if (diaryPage > 0) flipDiary(-1); });
+$("diaryBook").addEventListener("click", (e) => { if (e.target === $("diaryBook")) closeDiary(); });
+renderDiaryPage();
+
+// --- Corner hammer: glows on hover (CSS), strikes on click, then plays ---
+$("hammerBtn").addEventListener("click", () => {
+  const btn = $("hammerBtn");
+  btn.classList.add("striking");
+  setTimeout(() => {
+    btn.classList.remove("striking");
+    send({ type: "find_random", ...profile() });
+  }, 380);
+});
 
 $("playBtn").addEventListener("click", () => send({ type: "find_random", ...profile() }));
 $("createBtn").addEventListener("click", () => send({ type: "create", mode: "private", playerLimit: 10, ...profile() }));
-$("joinBtn").addEventListener("click", () => send({ type: "join", code: $("codeInput").value.trim(), ...profile() }));
+$("joinBtn").addEventListener("click", () => {
+  const code = $("codeInput").value.trim();
+  if (!code) { $("error").textContent = "Enter a room code first, or use Create Room."; $("codeInput").focus(); return; }
+  send({ type: "join", code, ...profile() });
+});
 $("limitInput").addEventListener("input", () => {
   $("limitValue").textContent = $("limitInput").value;
   send({ type: "set_settings", mode: $("modeInput").value, playerLimit: Number($("limitInput").value) });
@@ -110,7 +214,6 @@ function render() {
   $("roomCode").textContent = state.code ? `CODE-${state.code}` : "";
   if (state.phase === "lobby") {
     show("panel-lobby");
-    // Lobby avatars are always masked — the masked versions are the point.
     $("lobbyGrid").innerHTML = state.players.map((p) => avatarHTML(p, true)).join("");
     const isHost = me && me.id === state.hostId;
     $("hostSettings").hidden = !isHost;
