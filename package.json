@@ -1,0 +1,1 @@
+{"dependencies":{"ws":"^8.18.0"},"description":"Silent Bid — a multiplayer social-deduction bidding game: masked operatives, a 10-item draft, unmasked discussion, silent blind bidding, and an escalating tie-breaker.","name":"silent-bid","private":true,"scripts":{"start":"node server/server.js","test":"node --test tests/game-logic.test.js"},"type":"module","version":"0.1.0"}

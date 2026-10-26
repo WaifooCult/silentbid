@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SILENT BID</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><h1 class="logo">SILENT BID</h1><p id="status">Loading…</p></header>
+<main>
+  <!-- START PAGE / AVATAR & LOBBY SETUP -->
+  <section id="panel-setup" class="panel">
+    <h2>Avatar &amp; Lobby Setup</h2>
+    <div class="setup-grid">
+      <div class="card">
+        <div id="avatarPreview" class="avatar-preview"></div>
+        <label>Display name <input id="nameInput" placeholder="Operative name" maxlength="20"></label>
+        <label>Base color <select id="colorInput"></select></label>
+        <label>Eyes / expression <select id="eyesInput"></select></label>
+        <label>Mask type <select id="maskInput"></select></label>
+      </div>
+      <div class="card">
+        <button id="playBtn" class="btn-cyan">[PLAY]</button>
+        <div id="roomActions" hidden>
+          <button id="createBtn" class="btn-red">[CREATE PRIVATE ROOM]</button>
+          <button id="randomBtn" class="btn-cyan">[FIND RANDOM ROOM]</button>
+          <label>Join with code <input id="codeInput" placeholder="CODE, e.g. K9X2" maxlength="4"></label>
+          <button id="joinBtn">[JOIN WITH CODE]</button>
+        </div>
+        <p class="hint">Create generates a CODE-XXXX private room. Find Random searches the public queue and never creates a room if it is empty.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOBBY / HOST SETTINGS -->
+  <section id="panel-lobby" class="panel" hidden>
+    <h2>Waiting Room <span id="roomCode"></span></h2>
+    <div id="lobbyGrid" class="avatar-grid"></div>
+    <div id="hostSettings" class="card" hidden>
+      <h3>Host settings</h3>
+      <label>Mode
+        <select id="modeInput"><option value="private">Private</option><option value="public">Public</option></select>
+      </label>
+      <label>Player limit: <span id="limitValue">10</span>
+        <input id="limitInput" type="range" min="2" max="10" value="10">
+      </label>
+      <button id="startBtn" class="btn-gold">[INITIALIZE OPERATION (START)]</button>
+      <p class="hint">Scaling is set at Start from the actual players connected, not the limit.</p>
+    </div>
+    <p id="lobbyHint" class="hint">Waiting for the host to initialize the operation…</p>
+  </section>
+
+  <!-- DRAFT BOARD -->
+  <section id="panel-draft" class="panel" hidden>
+    <h2>Phase 1: The Draft Board — <span id="draftCount">0/10 selected</span> · <span id="draftTimer"></span></h2>
+    <div id="draftGrid" class="draft-grid"></div>
+  </section>
+
+  <!-- AUCTION FLOOR -->
+  <section id="panel-game" class="panel" hidden>
+    <div id="gameHeader"><h2 id="roundTitle"></h2><span id="gameTimer"></span></div>
+    <div id="playerRow" class="avatar-grid"></div>
+    <div class="card" id="hintCard"><p id="hintText"></p></div>
+    <div id="revealCard" class="card" hidden>
+      <h3 id="revealItem"></h3><p id="revealReason"></p><ul id="revealBids"></ul>
+    </div>
+    <div id="chatBox" class="card">
+      <div id="chatFeed"></div>
+      <div class="row"><input id="chatInput" placeholder="Discuss, bluff, or form alliances…"><button id="chatSend">Send</button></div>
+    </div>
+    <div class="row">
+      <button id="endDiscussionBtn" class="btn-red">[END DISCUSSION]</button>
+      <div id="bidBox" hidden>
+        <label>Your blind bid (₹) <input id="bidInput" type="number" placeholder="₹_____"></label>
+        <button id="bidBtn" class="btn-cyan">[SUBMIT BLIND BID]</button>
+      </div>
+    </div>
+    <p id="walletLine" class="hint"></p>
+  </section>
+
+  <section id="panel-ended" class="panel" hidden>
+    <h2>Operation complete</h2><p id="endedText"></p>
+  </section>
+  <p id="error" class="error"></p>
+</main>
+<script type="module" src="app.js"></script>
+</body>
+</html>
