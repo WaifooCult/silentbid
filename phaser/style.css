@@ -1,0 +1,9 @@
+body{margin:0;background:#141019;color:#e5e7eb;font:15px/1.5 system-ui,sans-serif}
+main{max-width:960px;margin:0 auto;padding:12px}
+.top-form,.bottom-form{background:#2a2d30;border:1px solid #444;border-radius:12px;padding:12px;margin:10px 0;display:flex;gap:12px;flex-wrap:wrap;align-items:end}
+label{display:block;font-weight:700}
+input{background:#111827;color:#e5e7eb;border:1px solid #444;border-radius:8px;padding:10px;margin-top:4px}
+button{background:#333;color:#e5e7eb;border:1px solid #555;border-radius:8px;padding:10px 14px;cursor:pointer}
+#gameContainer{border:2px solid #3f3a56;border-radius:12px;overflow:hidden;background:#1d1d28}
+#gameContainer canvas{display:block;margin:0 auto}
+.error{color:#ff2447}.hint{color:#9ca3af}.hint a{color:#22d3ee}

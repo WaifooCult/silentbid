@@ -17,6 +17,7 @@ crimson, cyan and electric-gold accents — like Skribbl.io, but underground.
 npm install
 npm start
 # Open http://localhost:8080 in 2–10 browser windows/tabs.
+# Phaser 2D version: open http://localhost:8080/phaser/
 ```
 
 One tab creates a room (private code, or public), the others join with the
@@ -120,6 +121,26 @@ Shadow ₹200 → **Shadow wins** under rule 2.
 The first player to reach their win threshold wins the operation.
 Otherwise the game ends after round 25.
 
+## Phaser 2D version (built from phaser-core)
+
+`phaser/` is a full Phaser 4.2 version of the same game, built from the
+skills.sh skill `gamedev-skills/awesome-gamedev-agent-skills@phaser-core`
+(no API key, repo ~4.4 MB, installed with
+`npx skills add gamedev-skills/awesome-gamedev-agent-skills --skill phaser-core -y`).
+It uses the same server and the same `game-logic.js` — Phaser only renders:
+Setup, Rules Diary (page-flip overlay), Lobby, Draft, Game
+(discussion / silent bidding / reveal) and Ended scenes, with the boss
+silhouette, posters, table, glowing Rules book and POWER hammer, and
+masks that **slide** on and off with a Phaser tween instead of swapping
+instantly. Play Again on the ended screen starts a new operation.
+The classic DOM client in `client/` still works as a fallback.
+
+No other skills were needed for this build: Phaser has no physics or
+movement in Silent Bid, so `phaser-arcade-physics` was not used. If
+physics is ever added, its command (same small repo) is:
+`npx skills add gamedev-skills/awesome-gamedev-agent-skills --skill phaser-arcade-physics -y`
+— no zip needed for that one, it is not a large repo.
+
 ## Project layout
 
 ```
@@ -131,6 +152,10 @@ client/
   index.html         Start page, avatar/lobby setup, draft board, auction floor
   style.css          Dark-mode charcoal + neon theme
   app.js             Client rendering + WebSocket messages (no game authority)
+phaser/
+  index.html         Phaser 2D page (name + room-code boxes, Phaser canvas, chat/bid boxes)
+  style.css          Page layout for the Phaser version
+  main.js            Phaser 4.2 scenes: Setup, Diary, Lobby, Draft, Game, Ended
 tests/game-logic.test.js   node:test — scaling, all tie-breaker cases, discussion, bids
 ```
 

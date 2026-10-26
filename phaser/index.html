@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SILENT BID — Phaser 2D</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js"></script>
+</head>
+<body>
+<main>
+  <div class="top-form">
+    <label>Enter your name
+      <input id="nameInput" placeholder="Enter your name" maxlength="20">
+    </label>
+    <label>Room code
+      <input id="codeInput" placeholder="e.g. K9X2" maxlength="4">
+    </label>
+    <span id="status">Loading Phaser…</span>
+  </div>
+  <div id="gameContainer"></div>
+  <div class="bottom-form">
+    <div id="chatForm" hidden>
+      <input id="chatInput" placeholder="Discuss, bluff, or form alliances…">
+      <button id="chatSend">Send</button>
+    </div>
+    <div id="bidForm" hidden>
+      <label>Your blind bid (₹) <input id="bidInput" type="number" placeholder="₹_____"></label>
+      <button id="bidSend">Submit blind bid</button>
+      <span id="walletLine"></span>
+    </div>
+    <p id="error" class="error"></p>
+    <p class="hint">Phaser 2D version of Silent Bid — same server, same rules as the classic version. <a href="../client/">Classic DOM version</a> · Type your name above the game, then use the buttons inside the game. Chat and bid boxes appear below the game only when you need them.</p>
+  </div>
+</main>
+<script type="module" src="main.js"></script>
+</body>
+</html>
