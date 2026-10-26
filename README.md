@@ -8,7 +8,8 @@ to earn freedom.
 crimson, cyan and electric-gold accents — like Skribbl.io, but underground.
 
 > GitHub repo name note: GitHub repository names cannot contain spaces, so
-> this project is published as **`silent-bid`**.
+> this project is published as **`silentbid`** at
+> https://github.com/WaifooCult/silentbid.
 
 ## How to run (local multiplayer)
 
