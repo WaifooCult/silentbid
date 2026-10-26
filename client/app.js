@@ -68,9 +68,10 @@ function avatarSVG(p, masked) {
     <path d="M18 120 L34 94 Q60 86 86 94 L102 120 Z" fill="${color}" stroke="#000" stroke-width="2"/>
     <path d="M28 92 Q28 22 60 22 Q92 22 92 92 Z" fill="${color}" stroke="#000" stroke-width="2"/>
     <path d="M28 92 Q28 22 60 22 L60 92 Z" fill="#000" opacity="0.18"/>
+    <path d="M36 40 Q60 28 84 40" stroke="#fff" stroke-width="2" fill="none" opacity="0.25"/>
     <rect x="42" y="42" width="36" height="28" rx="8" fill="#1c1c1c"/>
     ${eyesSVG(p.eyes)}
-    ${masked ? maskSVG(p.mask, color) : mouthSVG(p.eyes)}
+    ${masked ? `<g class="mask-layer">${maskSVG(p.mask, color)}</g>` : mouthSVG(p.eyes)}
   </svg>`;
 }
 
@@ -85,6 +86,33 @@ function avatarHTML(p, masked) {
 }
 function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
 function send(obj) { if (ws.readyState === 1) ws.send(JSON.stringify(obj)); }
+
+// --- Sound, generated in the browser with WebAudio (no audio files, no API) ---
+let soundOn = localStorage.getItem("silentbid-sound") !== "off";
+let audioCtx = null;
+function tone(freq, dur, type = "sine", gain = 0.08, when = 0) {
+  if (!soundOn) return;
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === "suspended") audioCtx.resume();
+    const t = audioCtx.currentTime + when;
+    const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+    osc.type = type; osc.frequency.value = freq;
+    g.gain.setValueAtTime(gain, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    osc.connect(g); g.connect(audioCtx.destination); osc.start(t); osc.stop(t + dur);
+  } catch { /* sound is optional; the game works without it */ }
+}
+function playClick() { tone(600, 0.07, "square", 0.03); }
+function playGavel() { tone(90, 0.25, "sine", 0.15); tone(55, 0.3, "triangle", 0.1, 0.02); }
+function playReveal() { tone(520, 0.15, "sine", 0.06); tone(780, 0.2, "sine", 0.06, 0.12); }
+function playWin() { [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.25, "sine", 0.07, i * 0.14)); }
+function renderSoundBtn() { $("soundToggleBtn").textContent = soundOn ? "🔊 Sound: ON" : "🔇 Sound: OFF"; }
+$("soundToggleBtn").addEventListener("click", () => {
+  soundOn = !soundOn; localStorage.setItem("silentbid-sound", soundOn ? "on" : "off");
+  renderSoundBtn(); if (soundOn) playClick();
+});
+renderSoundBtn();
+document.addEventListener("click", (e) => { if (e.target.closest("button")) playClick(); });
 
 // Avatar selector state — cycled with < > arrows.
 const sel = { color: 3, eyes: 3, mask: 0 }; // Charcoal, Deadpan, Bandana
@@ -169,6 +197,7 @@ renderDiaryPage();
 // --- Corner hammer: glows on hover (CSS), strikes on click, then plays ---
 $("hammerBtn").addEventListener("click", () => {
   const btn = $("hammerBtn");
+  playGavel();
   btn.classList.add("striking");
   setTimeout(() => {
     btn.classList.remove("striking");
@@ -197,9 +226,11 @@ $("chatInput").addEventListener("keydown", (e) => { if (e.key === "Enter") $("ch
 $("endDiscussionBtn").addEventListener("click", () => send({ type: "end_discussion" }));
 $("bidBtn").addEventListener("click", () => send({ type: "bid", amount: Number($("bidInput").value) }));
 
-ws.onopen = () => { $("status").textContent = "Connected — set up your operative, then create or find a room."; };
-ws.onclose = () => { $("status").textContent = "Not connected to a game server. If this page is on Vercel alone, the server is not running there — see DEPLOYMENT.md and use Render, or run it locally."; };
-ws.onerror = () => { $("status").textContent = "Could not reach the game server. See DEPLOYMENT.md: Vercel alone cannot run this WebSocket server; Render (or local) can."; };
+$("playAgainBtn").addEventListener("click", () => window.location.reload());
+
+ws.onopen = () => { $("status").textContent = "Syndicate comms live"; $("status").classList.remove("offline"); };
+ws.onclose = () => { $("status").textContent = "Syndicate comms standby — server not reached"; $("status").classList.add("offline"); };
+ws.onerror = () => { $("status").textContent = "Syndicate comms standby — server not reached"; $("status").classList.add("offline"); };
 ws.onmessage = (event) => {
   const msg = JSON.parse(event.data);
   if (msg.type === "joined") { myId = msg.playerId; }
@@ -208,8 +239,21 @@ ws.onmessage = (event) => {
   if (msg.type === "state") { state = msg.room; render(); }
 };
 
+let lastPhase = null;
 function render() {
   if (!state) return;
+  // Finished-product theme: cartoony at the start, darker and more ominous
+  // as the operation goes on — and darkest of all during silent bidding.
+  let ominous = 0;
+  if (["discussion", "bidding", "reveal"].includes(state.phase)) {
+    ominous = state.round <= 7 ? 1 : state.round <= 16 ? 2 : 3;
+    if (state.phase === "bidding" || state.phase === "reveal") ominous = Math.max(ominous, 2);
+  }
+  document.body.dataset.ominous = String(ominous);
+  document.body.dataset.phase = state.phase;
+  if (state.phase === "reveal" && lastPhase !== "reveal") playReveal();
+  if (state.phase === "ended" && lastPhase !== "ended") playWin();
+  lastPhase = state.phase;
   const me = state.players.find((p) => p.id === myId);
   $("roomCode").textContent = state.code ? `CODE-${state.code}` : "";
   if (state.phase === "lobby") {

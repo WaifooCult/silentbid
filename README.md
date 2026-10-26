@@ -121,6 +121,29 @@ Shadow ₹200 → **Shadow wins** under rule 2.
 The first player to reach their win threshold wins the operation.
 Otherwise the game ends after round 25.
 
+## Finished product — art direction (2026-10-26)
+
+Built from two skills.sh skills, both small and key-free:
+`gamedev-skills/awesome-gamedev-agent-skills@create-game-assets`
+(art-direction brief, asset families, cohesion gates) and
+`omer-metin/skills-for-antigravity@game-ui-design`
+(clarity in chaos, every element earns its screen space, motion is
+communication, not decoration).
+
+- **Shape language:** angular hood, fedora boss with gavel and red halo
+  ring, sharp shoulders, rounded dark card, gold corner brackets.
+- **Palette:** black `#0a0a0f`, dark purple-gray card `#2b2533`,
+  crimson `#ff2447`, gold `#f5c518`, teal status `#22d3ee`.
+- **Light:** red vignette glows at both edges, lamp glow, glowing
+  red PLAY! and glowing boss eyes.
+- **Theme arc:** cartoony at the start, darker and more ominous as
+  rounds progress (rounds 1–7 light, 8–16 darker, 17–25 near-black with
+  pulsing red vignette), darkest during silent bidding and reveal.
+- **Sound:** WebAudio only, no audio files — clicks, gavel thud,
+  reveal chime, win arpeggio, with a Sound ON/OFF toggle.
+- **What it is not:** no fake language dropdown, no copied Antigravity
+  code — same Silent Bid server and logic, new dressing only.
+
 ## Phaser 2D version (built from phaser-core)
 
 `phaser/` is a full Phaser 4.2 version of the same game, built from the

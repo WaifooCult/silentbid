@@ -1,7 +1,21 @@
-:root{--bg:#141019;--card:#2a2d30;--panel:#241f33;--line:#444;--red:#e11d48;--red-bright:#ff2447;--cyan:#22d3ee;--gold:#f5c518;--text:#e5e7eb;--muted:#9ca3af}
+:root{--bg:#0a0a0f;--card:#2b2533;--panel:#241f33;--line:#444;--red:#e11d48;--red-bright:#ff2447;--cyan:#22d3ee;--gold:#f5c518;--text:#e5e7eb;--muted:#9ca3af}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,sans-serif;
 background-image:linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,.15) 40%, rgba(0,0,0,.6)),repeating-linear-gradient(90deg, rgba(255,255,255,.02) 0 40px, transparent 40px 80px)}
+/* Red vignette glows at both edges — the noir auction floor, not a flat page. */
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+background:radial-gradient(ellipse 300px 500px at 0% 50%, rgba(255,36,71,.14), transparent 70%),radial-gradient(ellipse 300px 500px at 100% 50%, rgba(255,36,71,.14), transparent 70%)}
+main,.game-header{position:relative;z-index:1}
+body[data-ominous="1"]{--card:#262030}
+body[data-ominous="2"]{--bg:#060608;--card:#1e1a28}
+body[data-ominous="2"]::before{background:radial-gradient(ellipse 300px 500px at 0% 50%, rgba(255,36,71,.22), transparent 70%),radial-gradient(ellipse 300px 500px at 100% 50%, rgba(255,36,71,.22), transparent 70%)}
+body[data-ominous="3"]{--bg:#030303;--card:#17131f}
+body[data-ominous="3"]::before{background:radial-gradient(ellipse 320px 520px at 0% 50%, rgba(255,36,71,.32), transparent 70%),radial-gradient(ellipse 320px 520px at 100% 50%, rgba(255,36,71,.32), transparent 70%);animation:vignettePulse 3s ease-in-out infinite}
+body[data-ominous="3"] .boss-svg{filter:drop-shadow(0 0 18px rgba(255,36,71,.8))}
+@keyframes vignettePulse{0%,100%{opacity:.7}50%{opacity:1}}
+.tagline{color:var(--gold);font-size:12px;font-weight:800;letter-spacing:2px;margin:4px 0 0;text-shadow:1px 1px 0 #000}
+.status-pill{background:#0f766e;color:#ccfbf1;border:1px solid #14b8a6;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:800}
+.status-pill.offline{background:#3f3f46;color:#e5e7eb;border-color:#555}
 .game-header{padding:8px 24px 0;background:#0f0d16;border-bottom:3px solid #3a1a1a}
 .logo-scene{position:relative;max-width:900px;margin:0 auto;text-align:center;padding-top:8px}
 .boss-svg{display:block;width:min(420px,90vw);height:auto;margin:0 auto -28px}
@@ -18,7 +32,10 @@ main{padding:16px 24px 48px;max-width:1000px;margin:0 auto}
 .name-label input{margin-top:8px;font-size:18px;text-align:center}
 .avatar-stage{display:flex;gap:12px;align-items:center;justify-content:center;margin:16px 0}
 .avatar-arrows{display:flex;flex-direction:column;gap:14px}
-.avatar-frame{width:180px;height:180px;background:#b91c2e;border:4px solid #7f1d2d;border-radius:6px;box-shadow:0 0 0 3px #111, 6px 6px 0 rgba(0,0,0,.5);overflow:hidden;flex-shrink:0}
+.avatar-frame{width:180px;height:180px;background:#b91c2e;border:4px solid #7f1d2d;border-radius:6px;box-shadow:0 0 0 3px #111, 6px 6px 0 rgba(0,0,0,.5), 0 0 24px rgba(255,36,71,.35);overflow:hidden;flex-shrink:0;position:relative}
+.avatar-frame::before,.avatar-frame::after{content:"";position:absolute;width:22px;height:22px;border:4px solid var(--gold);z-index:2;pointer-events:none}
+.avatar-frame::before{top:6px;left:6px;border-right:0;border-bottom:0}
+.avatar-frame::after{bottom:6px;right:6px;border-left:0;border-top:0}
 .avatar-frame svg{width:100%;height:100%;display:block}
 .avatar-tools{display:flex;flex-direction:column;gap:12px;align-items:center}
 .dice-btn,.mask-tool-btn{background:#111827;color:var(--text);border:2px solid #555;border-radius:10px;padding:8px;cursor:pointer;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:4px}
@@ -27,7 +44,8 @@ main{padding:16px 24px 48px;max-width:1000px;margin:0 auto}
 .arrow-btn:hover{border-color:var(--cyan)}
 .selector-values{font-weight:600}
 .btn-big{display:block;width:100%;font-size:24px;font-weight:900;padding:14px;border-radius:10px;border:0;cursor:pointer;margin:10px 0;color:#fff}
-.btn-play{background:var(--red-bright);text-shadow:2px 2px 0 #000;box-shadow:0 4px 0 #7f1d2d}
+.btn-play{background:var(--red-bright);text-shadow:2px 2px 0 #000;box-shadow:0 4px 0 #7f1d2d, 0 0 22px rgba(255,36,71,.55);animation:playGlow 2.5s ease-in-out infinite}
+@keyframes playGlow{0%,100%{box-shadow:0 4px 0 #7f1d2d, 0 0 18px rgba(255,36,71,.45)}50%{box-shadow:0 4px 0 #7f1d2d, 0 0 32px rgba(255,36,71,.75)}}
 .room-btn-row{display:flex;gap:10px}.room-btn-row button{flex:1}
 .btn-room{font-size:16px;font-weight:800;padding:12px;border-radius:10px;border:2px solid;cursor:pointer;color:#fff}
 .btn-create{background:#3a1212;border-color:var(--red)}.btn-join{background:#222527;border-color:#9ca3af}
@@ -55,6 +73,8 @@ label{display:block;margin:8px 0}.hint{color:var(--muted)}.error{color:var(--red
 .avatar{width:118px;text-align:center;border:1px solid var(--line);border-radius:10px;padding:8px;background:#222527}
 .avatar svg{width:72px;height:72px;display:block;margin:0 auto}
 .avatar.masked{outline:2px solid var(--red)}
+.avatar.masked .mask-layer{animation:maskIn .4s ease}
+@keyframes maskIn{from{transform:translateY(-22px);opacity:0}to{transform:translateY(0);opacity:1}}
 .avatar .mask-tag{color:var(--red);font-weight:800;font-size:12px}
 .avatar .mask-name{font-size:12px;color:var(--muted)}
 .draft-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
